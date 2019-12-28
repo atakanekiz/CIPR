@@ -128,7 +128,10 @@ ui <- fluidPage(
                  )       
         ),
         
-        
+        tabPanel("Analysis details",
+                 
+                 verbatimTextOutput(outputId="console", placeholder = T)
+                 ),
         
         tabPanel("How to use this program",
                  
