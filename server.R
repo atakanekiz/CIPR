@@ -6,6 +6,7 @@ server <- function(input, output){
   library(ggpubr)
   library(gtools)
   library(shinyWidgets)
+
   
   
 
@@ -23,7 +24,7 @@ server <- function(input, output){
     )
     
     brushedPoints(top5_df_brush, input$brushtop5)
-  }, striped = T)
+  }, striped = T, hover = T, spacing = "s")
   
   
   # Disable download button until the execution
@@ -51,9 +52,9 @@ server <- function(input, output){
   
   # Select reference cell subsets to analyze
   output$ui_sel_subsets <- renderUI ({
-    
+
     if(input$sel_reference == "ImmGen"){
-      
+
       pickerInput("cell_subsets", "Select reference cell subsets to analyze",
                   multiple = T,
                   choices = c("B cell", "Basophil", "DC", "Eosinophil", "gd-T cell",
@@ -65,9 +66,9 @@ server <- function(input, output){
                                "Mast cell", "Monocyte", "NK cell", "NKT cell", "Pre-B cell",
                                "Pre-T cell", "Stem-Progenitor", "Stromal", "T cell", "Treg"),
                   options = list(`actions-box` = TRUE))
-      
+
     }
-    
+
   })
   
   
@@ -908,10 +909,7 @@ server <- function(input, output){
   
   top_df <- reactive({
     
-    # if(input$comp_method == "logFC dot product"){
-    
-    
-    
+  
     # Extract top5 hits from the reuslts
     top5_df <- analyzed_df() %>%
       mutate(cluster = factor(cluster, levels = mixedsort(levels(as.factor(cluster))))) %>%
@@ -947,16 +945,18 @@ server <- function(input, output){
   # Create plots for top5 results
   output$top5 <- renderPlot({
     
+    # This sets up the HTML tag for error message to show properly
+    # This was needed here somehow although before validation message was showing properly
+    validate(need(user_data(), ""))
+    
     
     # if(input$comp_method == "logFC dot product"){
     
     
-    top_plot <- top_df()
-    
-    ggdotplot(top_plot, x="index", y="identity_score", 
+    ggdotplot(top_df(), x="index", y="identity_score", 
               fill = "cluster", size=1, x.text.angle=90, 
               font.legend = c(15, "plain", "black")) +
-      scale_x_discrete(labels=top_plot$reference_id)+
+      scale_x_discrete(labels=top_df()$reference_id)+
       theme(axis.text.x = element_text(vjust=0.5, hjust=1))
     
     

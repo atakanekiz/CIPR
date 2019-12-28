@@ -1,8 +1,18 @@
-ui <- fluidPage(
+library(shinythemes)
+
+ui <- fluidPage(theme=shinytheme("cerulean"),
   
   shinyjs::useShinyjs(), # needed for download button to work
   
   tags$head(includeHTML(("data/google_analytics.html"))), # To track user experience
+  
+  tags$head(
+    tags$style(HTML("
+      .shiny-output-error-validation {
+        color: steelblue;
+      }
+    "))
+  ),
   
   titlePanel(title=div(img(src="cipr_logo_small.png"), "Cluster identity predictor"), windowTitle = "CIPR"),
   
@@ -87,8 +97,8 @@ ui <- fluidPage(
     ),
     
     
-    
-    mainPanel(
+      
+    mainPanel(width=10,
       
       
       
@@ -98,7 +108,8 @@ ui <- fluidPage(
                  
                  fluidRow(
                    plotOutput("top5", brush = "brushtop5", height="600px"),
-                   tableOutput("brushtop5"),
+                   div(tableOutput("brushtop5"), style = "font-size:85%"),
+                   br(),
                    p(strong("\n\nDefinition of table columns")),
                    tags$ul(
                      tags$li(strong("Cluster:"), "The name of the unknown cluster"),
