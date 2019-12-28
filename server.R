@@ -1,5 +1,3 @@
-# v5 ====> copied from v4 and v3
-
 
 server <- function(input, output){
   
@@ -10,14 +8,7 @@ server <- function(input, output){
   library(shinyWidgets)
   
   
-  # https://gist.github.com/jcheng5/3830244757f8ca25d4b00ce389ea41b3
-  # withConsoleRedirect <- function(containerId, printout) {
-  #   # removeUI(paste0("#", containerId))
-  #   insertUI(paste0("#", containerId), where = "beforeEnd",
-  #            ui = printout
-  #   )
-  # }
-  
+
   values <- reactiveValues()
   
   
@@ -259,7 +250,7 @@ server <- function(input, output){
   ################################################################################################################################
   
   # Delay slider update
-  var_filt <- reactive({input$var_filter}) %>% debounce(750)
+  var_filt <- reactive({input$var_filter})
   
   
   #############################################################################################################################
@@ -308,12 +299,7 @@ server <- function(input, output){
       
       if(input$sel_reference == "ImmGen"){
         
-        # Calculated from immgen data by taking the ratio of gene expression per cluster to the overall average
-        # and log transforming these values. This object is prepared separately to reduce compute time here
-        
-        # reference <- as.data.frame(readRDS("data/immgen_recalc_ratio.rds"))
-        
-        # Read main expression dataframe instead      
+        # Read main expression dataframe
         reference <- as.data.frame(readRDS("data/immgen.rds"))
         
         # Name of the gene column in reference data
@@ -391,23 +377,20 @@ server <- function(input, output){
     
     
     
+   
     
-    # Apply quantile filtering
-    
-    # if(input$sel_reference == "ImmGen"){
-    #   
-    #   var_vec <- readRDS("data/var_vec.rds")
-    #   
-    #   keep_var <- quantile(var_vec, probs = 1-var_filt()/100, na.rm = T)
-    #   
-    #   keep_genes <- var_vec >= keep_var
-    #   
-    # } else{
     
     # Subset the reference to the relevant subsets in analysis
     reference <- reference[, subsets_in_analysis()]
     
+    # Report dims of unfiltered reference dataframe
     
+    values$ref_rows <- dim(reference)[1]
+    values$ref_cols <- dim(reference)[2]-1
+    
+    
+    
+    # Apply quantile filtering
     if(var_filt() != 100){
       
       var_vec <- apply(reference[, !colnames(reference) %in% ref_gene_column], 1, var, na.rm=T)
@@ -415,9 +398,6 @@ server <- function(input, output){
       keep_var <- quantile(var_vec, probs = 1-var_filt()/100, na.rm = T)
       
       keep_genes <- var_vec >= keep_var
-      
-      # } # removed ifelse condition to apply filtering when the whole ref dataframe is not used
-      
       
       # Return reference data frame
       refdat <- as.data.frame(reference[keep_genes, ])
@@ -1026,15 +1006,19 @@ server <- function(input, output){
     
     invalidateLater(100)
     
-    a <- paste0("Number of features in reference after variance filtering: ", values$keep_genes);
+    a <- paste0("Number of samples in reference: ", values$ref_cols)
     
-    b <- paste0("Cluster in analysis: ", values$current_cluster);
+    b <- paste0("Number of genes in reference without variance filtering: ", values$ref_rows)
     
-    c <- paste0("Number of genes shared between reference and input: ", values$genes_in_analysis);
+    c <- paste0("Number of features in reference with variance filtering: ", values$keep_genes);
+    
+    d <- paste0("Cluster in analysis: ", values$current_cluster);
+    
+    e <- paste0("Number of genes shared between reference and input: ", values$genes_in_analysis);
     
     
     output$console <- renderText({
-      paste("\n", a, paste("\n", b, c, sep ="\n", collapse=""), sep="\n", collapse = "")
+      paste(a, b, c, paste("\n", d, e, sep ="\n", collapse=""), sep="\n", collapse = "")
       
     })
     
