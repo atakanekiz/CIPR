@@ -120,7 +120,7 @@ server <- function(input, output){
     
     if(grepl("logFC", input$comp_method)){
       
-      if(is.null(inFile) & input$example_data == T){
+      if(input$example_data == T){
         
         
         dat <- read.csv("data/Trimmed_cluster_signatures.csv",
@@ -987,43 +987,38 @@ server <- function(input, output){
   )
   
   
-  # observeEvent(input$run,{
-  # 
-  #   removeUI("#console")
-  # 
-  # })
-  
+
   
   observeEvent(input$run, {
-    
+
     output$console <- renderText({
-      
+
     })
-    
+
   })
-  
+
   observeEvent(input$run, {
-    
+
     invalidateLater(100)
-    
+
     a <- paste0("Number of samples in reference: ", values$ref_cols)
-    
+
     b <- paste0("Number of genes in reference without variance filtering: ", values$ref_rows)
-    
+
     c <- paste0("Number of features in reference with variance filtering: ", values$keep_genes);
-    
+
     d <- paste0("Cluster in analysis: ", values$current_cluster);
-    
+
     e <- paste0("Number of genes shared between reference and input: ", values$genes_in_analysis);
-    
-    
+
+
     output$console <- renderText({
       paste(a, b, c, paste("\n", d, e, sep ="\n", collapse=""), sep="\n", collapse = "")
-      
+
     })
-    
-   
-    
+
+
+
   })
   
   
